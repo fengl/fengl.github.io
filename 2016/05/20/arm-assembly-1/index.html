@@ -1,0 +1,42 @@
+<!DOCTYPE html><html><head><meta name="generator" content="Hexo 3.8.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>学习ARM汇编 - 寄存器（一） | 冯磊的博客</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">冯磊的博客</a><span class="subtitle">专注地图行业</span><label id="toggle-menu" for="menu" onclick=""><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a></div></nav><div id="header-margin-bar"></div><!-- gallery that comes before the header--><div class="wrapper"><div class="container post-header"><h1>学习ARM汇编 - 寄存器（一）</h1></div></div><div class="wrapper"><div class="container meta"><div class="post-time">2016-05-20</div><div class="post-tags"><a class="post-tag-link" href="/tags/arm/">arm</a>/<a class="post-tag-link" href="/tags/assembly/">assembly</a></div></div></div><article><div class="container post"><p>工作需要，学习一下ARM汇编，以下内容主要来摘自于网络，主要翻译、摘取参考中的几个地址。</p>
+<h3 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h3><p>ARM处理器有32个寄存器，每个32位。在用户模式下，可以访问16个寄存器，这个是现阶段主要要了解的主要内容。</p>
+<p>这16个寄存器分别叫做r0-r15，其中最后4个比较特殊：</p>
+<ul>
+<li>r12: IP (Intra-Procedure), 栈寄存器。该寄存器被链接器当作暂存寄存器，在不同程序间调用时使用。每个程序在返回时不可以修改该寄存器的值。</li>
+<li>r13: SP (Stack Pointer), 栈指针。这里的栈是一块用于存储局部函数（local function-specific storage）的存储区域，当函数返回时，该存储区域被回收。该寄存器指向堆栈的顶端。如果需要在栈上分配一块空间，需要对该寄存器进行减操作。分配32位的空间，需要将该寄存器减4。</li>
+<li>r14: LR（Link Register), 链接寄存器。该寄存器存储子过程的返回值。当调用一个子过程时，LR的值为程序计数器。</li>
+<li>r15: PC (Program Counter), 该寄存器存储了当前正在执行的内存地址。</li>
+</ul>
+<p>另外，还有一个寄存器，叫状态寄存器，CPSR(Current Program Status Register), 该寄存器保存了一些标志，如负值、零、进位等。</p>
+<p>在汇编中，这是所有可以访问的变量。</p>
+<p>move指令：</p>
+<p>mov r0, r1                ; r0 = r1</p>
+<p>mov r0, r1, lsl #2        ; r0 = r1 \&lt;\&lt; 2</p>
+<p>mov r0, r1, lsr #3        ; r0 = (int) (r1 >> 3)</p>
+<p>mov r0, r1, lsl r2        ; r0 = (int) (r1 \&lt;\&lt; r2)</p>
+<h4 id="从内存加载数据"><a href="#从内存加载数据" class="headerlink" title="从内存加载数据"></a>从内存加载数据</h4><p>ldr r0, .L3               ; 从地址标签为.L3的位置拷贝内容给r0,  r0 = *(.L3)</p>
+<p>ldr r0, [r1]             ; r0 = *(r1)</p>
+<p>ldr r0, [r1, #4]         ; r0 = *(r1 + 1), 一次移动32位</p>
+<p>ldr r0, [r1, r2]         ; r0 = *(r1 + (r2/4)), 以一个寄存器为基准进行偏移</p>
+<p>ldr r0, [r1, -r2]        ; 如上一条，也可以是负的</p>
+<p>ldr r0, [r1, r2, lsl #4] ; r0 = *(r1 + ((r2 \&lt;\&lt; 4)/4)), r1加上r2逻辑左移4位之后赋值给r0</p>
+<p>lsl,  logical shift left</p>
+<p>lsr, logical shift right</p>
+<p>asl, arithmetic shift left</p>
+<p>asr, arithmetic shift right</p>
+<p>ror, rotate right</p>
+<p>ldr r0, [r1], #4         ; like a++,    r0=*(r1), r1=r1+1</p>
+<p>ldr r0, [r1, #4]!        ; like ++a,    r1=r1+4, r0=*(r1)</p>
+<p>ldr是从内存读数据到寄存器，而str是从寄存器存储到内存</p>
+<p>str r0, [r1]             ; *(r1) = r0</p>
+<p>str r0, [r1], #4         ; *(r1) = r0, r1=r1 + 1</p>
+<p>str r0, [r1], r2         ; *(r1) = r0, r1 = r1 + r2</p>
+<p>一知半解，如有不妥，后续更新……</p>
+<hr>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="http://www.eggwall.com/2011/09/android-arm-assembly-registers-memory.html" target="_blank" rel="noopener">http://www.eggwall.com/2011/09/android-arm-assembly-registers-memory.html</a></li>
+</ol>
+</div><!-- comment system--><div class="container"><hr></div></article><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="/atom.xml" target="_blank"><i class="fa fa-rss"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">Michael Feng</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+    $(".fancybox").fancybox();
+});
+</script></body></html>

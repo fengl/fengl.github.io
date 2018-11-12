@@ -1,0 +1,77 @@
+<!DOCTYPE html><html><head><meta name="generator" content="Hexo 3.8.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Apache模块开发（一）：快速体验 | 冯磊的博客</title><link rel="stylesheet" type="text/css" href="/css/normalize.css"><link rel="stylesheet" type="text/css" href="/css/highlight.css"><link rel="stylesheet" type="text/css" href="/css/very-simple.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"></head><body><!-- include the sidebar--><!-- include ./includes/sidebar.jade--><!-- Blog title and subtitle--><header><div class="container header"><a id="logo" href="/." class="title">冯磊的博客</a><span class="subtitle">专注地图行业</span><label id="toggle-menu" for="menu" onclick=""><i class="fa fa-bars"></i></label></div></header><!-- use checkbox hack for toggle nav-bar on small screens--><input id="menu" type="checkbox"><!-- Navigation Links--><nav id="nav"><div class="container"><a href="/" class="sidebar-nav-item active">Home</a><a href="/archives" class="sidebar-nav-item">Archives</a></div></nav><div id="header-margin-bar"></div><!-- gallery that comes before the header--><div class="wrapper"><div class="container post-header"><h1>Apache模块开发（一）：快速体验</h1></div></div><div class="wrapper"><div class="container meta"><div class="post-time">2016-09-19</div><div class="post-tags"><a class="post-tag-link" href="/tags/Apache/">Apache</a>/<a class="post-tag-link" href="/tags/httpd/">httpd</a>/<a class="post-tag-link" href="/tags/module/">module</a></div></div></div><article><div class="container post"><p>Apache模块开发的第一篇，我们用最快速简单的方式，感受Apache模块开发。</p>
+<a id="more"></a>
+<p><a href="http://alimap.org/2016/09/19/apache-module-1-quickstart/" target="_blank" rel="noopener">Apache模块开发（一）：快速体验</a></p>
+<p><a href="http://alimap.org/2016/09/20/apache-module-2-hellocpp/" target="_blank" rel="noopener">Apache模块开发（二）：拥抱C++</a></p>
+<p><a href="http://alimap.org/2016/12/18/apache-module-3-saymodule/" target="_blank" rel="noopener">Apache模块开发（三）：聊聊模块化</a></p>
+<h1 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h1><p>操作系统：CentOS 6</p>
+<p>Apache版本：2.2.31</p>
+<h1 id="源码安装Apache-httpd"><a href="#源码安装Apache-httpd" class="headerlink" title="源码安装Apache httpd"></a>源码安装Apache httpd</h1><ul>
+<li>下载源码</li>
+<li>解压缩</li>
+<li>进入目录</li>
+<li>./configure</li>
+<li>make</li>
+<li>sudo make install<br>默认会安装到/usr/local/apache2下面</li>
+</ul>
+<h1 id="测试安装结果"><a href="#测试安装结果" class="headerlink" title="测试安装结果"></a>测试安装结果</h1><ul>
+<li>sudo /usr/local/apache2/bin/apachectl start</li>
+<li>curl “<a href="http://localhost&quot;" target="_blank" rel="noopener">http://localhost&quot;</a></li>
+<li>如果出现<code>&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</code>说明安装成功</li>
+</ul>
+<h1 id="开发自己的模块"><a href="#开发自己的模块" class="headerlink" title="开发自己的模块"></a>开发自己的模块</h1><p>Apache允许用户开发自己的模块，以处理特殊的用户逻辑，细节我们后面再聊。</p>
+<p>我们现在要做的就是开发一个模块，当通过http请求的时候，返回简单的“Hello”就可以了。</p>
+<h2 id="生成工程文件"><a href="#生成工程文件" class="headerlink" title="生成工程文件"></a>生成工程文件</h2><p>Apache安装后，在安装目录的bin目录下有个文件叫apxs，用于创建、编译、安装Apache的自定义模块。</p>
+<p>首先，用它来创建一个工程：</p>
+<ol>
+<li><p>进入你的home目录：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建一个代码目录：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir code</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>进入code目录：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd code</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成工程：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/apache2/bin/apxs -g -n hello</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>进入hello目录，发现有三个文件，分别是：</p>
+<ul>
+<li>Makefile</li>
+<li>mod_hello.c</li>
+<li>modules.mk</li>
+</ul>
+</li>
+</ol>
+<h2 id="编译工程"><a href="#编译工程" class="headerlink" title="编译工程"></a>编译工程</h2><p>编译工程可以直接在hello目录下面输入<code>make</code>命令，也可以用刚才提到的apxs文件执行，我们采用简单的方式：</p>
+<ol>
+<li>确认自己在hello目录下</li>
+<li><code>make</code></li>
+<li><code>sudo make install</code></li>
+</ol>
+<p>新生成的文件会被安装到<code>/usr/local/apache2/modules/</code>目录下面，为mod_hello.so</p>
+<h2 id="配置模块"><a href="#配置模块" class="headerlink" title="配置模块"></a>配置模块</h2><p>Apache如何知道我们新创建的模块呢？这就需要在配置文件中进行相关配置：</p>
+<ol>
+<li>打开文件<code>/usr/local/apache2/conf/httpd.conf</code></li>
+<li><p>在文件最后追回如下内容：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LoadModule hello_module modules/mod_hello.so</span><br><span class="line">&lt;Location /hello&gt;</span><br><span class="line">	SetHandler hello</span><br><span class="line">&lt;/Location&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重新启动Apache</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo /usr/local/apache2/bin/apachectl stop</span><br><span class="line">sudo /usr/local/apache2/bin/apachectl start</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="验证成果"><a href="#验证成果" class="headerlink" title="验证成果"></a>验证成果</h2><ol>
+<li><code>curl &quot;http://localhost/hello&quot;</code></li>
+<li>会看到<code>The sample page from mo_hello.c</code></li>
+<li>成功！</li>
+</ol>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ol>
+<li>我们通过源码安装了Apache服务器。</li>
+<li>快速创建了一个hello模块。</li>
+<li>加载hello模块，并对其进行了验证。</li>
+</ol>
+<p>更多精彩，后续更新~</p>
+</div><!-- comment system--><div class="container"><hr></div></article><footer id="footer"><div class="container"><div class="bar"><div class="social"><a href="/atom.xml" target="_blank"><i class="fa fa-rss"></i></a></div><div class="footer">© 2018 <a href="/" rel="nofollow">Michael Feng</a>. Powered by <a rel="nofollow" target="_blank" href="https://hexo.io">Hexo</a>. Theme <a target="_blank" href="https://github.com/lotabout/very-simple">very-simple</a>.</div></div></div></footer><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.css"><script src="//cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script><script src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js"></script><script>$(document).ready(function() {
+    $(".fancybox").fancybox();
+});
+</script></body></html>
